@@ -3,7 +3,7 @@ name: Post Service CI/CD Pipeline
 on:
   push:
     paths:
-      - backend/src/PostService/**
+      - backend/src/**
       - .github/workflows/post.yml
     branches:
       - master
@@ -11,9 +11,7 @@ on:
     tags:
       - 'v*'
   pull_request:
-    branches:
-      - master
-      - develop
+    types: [opened, synchronize, reopened]
 
 jobs:
   build:
@@ -26,7 +24,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: '8.x'
 
     - name: Restore dependencies
       run: dotnet restore ./backend/FitnessApp.sln
@@ -35,7 +33,9 @@ jobs:
       run: dotnet build --configuration Release ./backend/FitnessApp.sln --no-restore
 
     - name: Run tests
-      run: dotnet test ./backend/FitnessApp.sln --no-restore --verbosity normal
+      run: |
+        dotnet test ./backend/tests/PostService/PostService.Domain.Tests/PostService.Domain.Tests.csproj --configuration Release --no-build --verbosity normal
+        dotnet test ./backend/tests/PostService/PostService.Application.Tests/PostService.Application.Tests.csproj --configuration Release --no-build --verbosity normal
 
   docker:
     needs: build
