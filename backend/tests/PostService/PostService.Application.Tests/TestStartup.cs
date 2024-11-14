@@ -1,8 +1,18 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using PostService.Application.Commands.AddComment;
+using PostService.Application.Commands.AddLike;
 using PostService.Application.Commands.AddPost;
+using PostService.Application.Commands.DeleteComment;
+using PostService.Application.Commands.DeleteLike;
+using PostService.Application.Commands.DeletePost;
+using PostService.Application.Commands.UpdatePost;
 using PostService.Application.DTOs;
+using PostService.Application.Queries.GetAllComments;
+using PostService.Application.Queries.GetAllLikes;
+using PostService.Application.Queries.GetAllPosts;
+using PostService.Application.Queries.GetPost;
 using PostService.Persistence;
 
 namespace PostService.Application.Tests;
@@ -17,7 +27,18 @@ public class TestStartup
                 options.UseNpgsql(connectionString);
             })
             .AddScoped<IValidator<CreatePostDto>, InlineValidator<CreatePostDto>>()
-            .AddScoped<AddPostCommandHandler>();
+            .AddScoped<IValidator<CreateCommentDto>, InlineValidator<CreateCommentDto>>()
+            .AddScoped<AddPostCommandHandler>()
+            .AddScoped<UpdatePostCommandHandler>()
+            .AddScoped<DeletePostCommandHandler>()
+            .AddScoped<AddCommentCommandHandler>()
+            .AddScoped<DeleteCommentCommandHandler>()
+            .AddScoped<AddLikeCommandHandler>()
+            .AddScoped<DeleteLikeCommandHandler>()
+            .AddScoped<GetPostQueryHandler>()
+            .AddScoped<GetAllPostsQueryHandler>()
+            .AddScoped<GetAllCommentsQueryHandler>()
+            .AddScoped<GetAllLikesQueryHandler>();
 
         return serviceCollection.BuildServiceProvider();
     }

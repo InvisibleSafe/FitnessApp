@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using PostService.Domain.Constants;
 using PostService.Persistence;
 using Shared.Application.Abstractions;
 using Shared.Application.Common;
@@ -20,25 +21,28 @@ public class DeleteLikeCommandHandler : ICommandHandler<DeleteLikeCommand, strin
 
         if (like == null)
         {
-            return Result<string>.Failure(new Error("Like not found."));
+            return Result<string>.Failure(new Error(ResponseMessages.LikeNotFound));
         }
 
-        if (like.UserId != command.UserId)
+        var isAlreadyLiked = await _context.Likes
+            .AnyAsync(l => l.PostId == command.PostId && l.UserId == command.UserId);
+    
+        if (!isAlreadyLiked)
         {
-            return Result<string>.Failure(new Error("You do not have permission to delete this like."));
+            return Result<string>.Failure(new Error(ResponseMessages.UserHasNotLikedThisPostYet));
         }
 
         var post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == like.PostId);
 
         if (post == null)
         {
-            return Result<string>.Failure(new Error("Post not found."));
+            return Result<string>.Failure(new Error(ResponseMessages.PostNotFound));
         }
 
         post.DecrementLikeCount();
         _context.Likes.Remove(like);
         await _context.SaveChangesAsync();
 
-        return Result<string>.Success("You successfully deleted like.");
+        return Result<string>.Success(ResponseMessages.YouSuccessfullyDeletedLike);
     }
 }

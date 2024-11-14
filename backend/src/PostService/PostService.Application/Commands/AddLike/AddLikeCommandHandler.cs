@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using PostService.Application.DTOs;
+using PostService.Domain.Constants;
 using PostService.Domain.Entities;
 using PostService.Persistence;
 using Shared.Application.Abstractions;
@@ -22,12 +23,15 @@ public class AddLikeCommandHandler : ICommandHandler<AddLikeCommand, LikeDto>
 
         if (post == null)
         {
-            return Result<LikeDto>.Failure(new Error("Post not found."));
+            return Result<LikeDto>.Failure(new Error(ResponseMessages.PostNotFound));
         }
-
-        if (post.UserId != command.UserId)
+        
+        var isAlreadyLiked = await _context.Likes
+            .AnyAsync(l => l.PostId == command.PostId && l.UserId == command.UserId);
+    
+        if (isAlreadyLiked)
         {
-            return Result<LikeDto>.Failure(new Error("You do not have permission to like this post."));
+            return Result<LikeDto>.Failure(new Error(ResponseMessages.UserHasAlreadyLikedThisPost));
         }
             
         var like = new Like(
@@ -41,6 +45,7 @@ public class AddLikeCommandHandler : ICommandHandler<AddLikeCommand, LikeDto>
         await _context.SaveChangesAsync();
 
         var likeDto = new LikeDto(
+            like.Id,
             like.PostId,
             like.UserId,
             like.CreatedAt);
