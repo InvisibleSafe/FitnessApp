@@ -2,26 +2,33 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 EXPOSE 8080
 
+ARG ASPNETCORE_ENVIRONMENT
+ARG DB_CONNECTION_STRING
+
+ENV ASPNETCORE_ENVIRONMENT=Development
+ENV ConnectionStrings__DockerConnection=${DB_CONNECTION_STRING}
+
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+
 WORKDIR /src
 
-COPY ["FitnessApp.sln", "./"]
-COPY ["src/PostService/PostService.Api/PostService.Api.csproj", "src/PostService/PostService.Api/"]
-COPY ["src/PostService/PostService.Application/PostService.Application.csproj", "src/PostService/PostService.Application/"]
-COPY ["src/PostService/PostService.Domain/PostService.Domain.csproj", "src/PostService/PostService.Domain/"]
-COPY ["src/PostService/PostService.Infrastructure/PostService.Infrastructure.csproj", "src/PostService/PostService.Infrastructure/"]
-COPY ["src/PostService/PostService.Persistence/PostService.Persistence.csproj", "src/PostService/PostService.Persistence/"]
-COPY ["src/Shared/Shared.Application/Shared.Application.csproj", "src/Shared/Shared.Application/"]
+COPY PostService/PostService.Api/PostService.Api.csproj PostService/PostService.Api/
+COPY PostService/PostService.Application/PostService.Application.csproj PostService/PostService.Application/
+COPY PostService/PostService.Domain/PostService.Domain.csproj PostService/PostService.Domain/
+COPY PostService/PostService.Infrastructure/PostService.Infrastructure.csproj PostService/PostService.Infrastructure/
+COPY PostService/PostService.Persistence/PostService.Persistence.csproj PostService/PostService.Persistence/
+COPY Shared/Shared.Application/Shared.Application.csproj Shared/Shared.Application/
 
-RUN dotnet restore "src/PostService/PostService.Api/PostService.Api.csproj"
+RUN dotnet restore PostService/PostService.Api/PostService.Api.csproj
 
 COPY . .
 
-WORKDIR "/src/src/PostService/PostService.Api"
-RUN dotnet build -c Release -o /app/build
+WORKDIR /src/PostService/PostService.Api
+
+RUN dotnet build PostService.Api.csproj -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish -c Release -o /app/publish
+RUN dotnet publish PostService.Api.csproj -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
