@@ -1,7 +1,11 @@
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {Post} from "../../models/post.model";
 import {ContentType} from "../../../../core/enums/content-type.enum";
 import {DatePipe, NgForOf, NgIf, NgOptimizedImage} from "@angular/common";
+import {PostService} from "../../services/post.service";
+import {LikeComponent} from "../like/like.component";
+import {CommentComponent} from "../comment/comment.component";
+import {PostModalComponent} from "../post-modal/post-modal.component";
 
 @Component({
   selector: 'app-post-list',
@@ -10,27 +14,30 @@ import {DatePipe, NgForOf, NgIf, NgOptimizedImage} from "@angular/common";
     DatePipe,
     NgIf,
     NgForOf,
-    NgOptimizedImage
+    NgOptimizedImage,
+    LikeComponent,
+    CommentComponent,
+    PostModalComponent
   ],
   templateUrl: './post-list.component.html',
   styleUrl: './post-list.component.scss'
 })
-export class PostListComponent {
+export class PostListComponent implements OnInit{
+  posts: Post[] = [];
+  selectedPost: Post | null = null;
+
   protected readonly ContentType = ContentType;
 
-  // Mocks
-  posts: Post[] = [
-    {
-      commentCount: 4,
-      contentType: ContentType.Image,
-      contentUrl: "https://www.istockphoto.com/resources/images/PhotoFTLP/P5-NOV-iStock-2158268393.jpg", // No Copyright
-      createdAt: new Date(),
-      description: "the men play football",
-      id: "215e4b41-b712-46e2-87a1-9fec01899c7d",
-      likeCount: 56,
-      title: "Title",
-      username: "example",
-      imageUrl: "assets/profile.svg"
-    }
-  ];
+  constructor(private postService: PostService) { }
+
+  ngOnInit(): void {
+    this.postService.getAllPosts().subscribe(posts => {
+      this.posts = posts;
+    });
+  }
+
+  openModal(post: Post): void {
+    this.selectedPost = post;
+  }
+
 }

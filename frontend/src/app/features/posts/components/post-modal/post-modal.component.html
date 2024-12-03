@@ -1,0 +1,45 @@
+<div class="modal-overlay" (click)="closeModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ post.title }}</h2>
+      <button class="close-btn" (click)="closeModal()">×</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="post-content">
+        <p><strong>{{ post.username }}</strong> • {{ post.createdAt | date: "medium" }}</p>
+        <img [src]="post.contentUrl" alt="Post Image" />
+        <div class="meta">
+          <!-- ToDo: fix opportunity to make infinity likes -->
+          <app-like [post]="post"></app-like>
+          <app-comment [post]="post"></app-comment>
+        </div>
+        <p class="description">{{ post.description }}</p>
+      </div>
+
+      <div class="comments-container">
+        <div class="comments">
+          <h3>Comments</h3>
+          <div *ngFor="let comment of comments" class="comment">
+            <p><strong>{{ comment.username }}</strong>: {{ comment.content }}</p>
+          </div>
+          <div #scrollAnchor></div>
+        </div>
+
+        <div class="form-container">
+          <form (submit)="sendComment($event, commentInput.value)">
+            <input
+              #commentInput
+              type="text"
+              placeholder="Enter your comment..."
+              [(ngModel)]="newComment"
+              name="comment"
+              required
+            />
+            <button type="submit">Send</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

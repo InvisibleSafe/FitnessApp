@@ -1,0 +1,14 @@
+.comment {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  svg {
+    transition: color 0.2s ease;
+  }
+
+  &:hover svg {
+    color: #000000;
+  }
+}
