@@ -23,8 +23,10 @@ services:
       dockerfile: PostService/Dockerfile
     ports:
       - "8081:8081"
+    environment:
+      DatabaseConnectionString: Host=postgres;Port=5432;Username=postgres;Password=mysecretpasswordfordevelopment;Database=PostsDb
     depends_on:
-      postgres-posts:
+      postgres:
         condition: service_healthy
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://post-service:8081/health || exit 1" ]
@@ -34,23 +36,22 @@ services:
     networks:
       - microservices
 
-  postgres-posts:
-    container_name: postgres-posts
+  postgres:
+    container_name: postgres
     image: postgres:15-alpine
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: mysecretpasswordfordevelopment
-      POSTGRES_DB: postgres
     ports:
       - "5432:5432"
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 10s
       timeout: 5s
       retries: 5
     volumes:
-      - post-service-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
     networks:
       - microservices
   
@@ -66,6 +67,8 @@ services:
       - "8080:8080"
     command: [ "start-dev" ]
     restart: always
+    networks: 
+      - microservices
 
 volumes:
-  post-service-data:
+  postgres-data:

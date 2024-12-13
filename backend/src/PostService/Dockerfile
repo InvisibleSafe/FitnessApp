@@ -2,12 +2,6 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 EXPOSE 8081
 
-ARG ASPNETCORE_ENVIRONMENT
-ARG DB_CONNECTION_STRING
-
-ENV ASPNETCORE_ENVIRONMENT=Development
-ENV ConnectionStrings__DockerConnection=${DB_CONNECTION_STRING}
-
 RUN apt-get update && apt-get install -y curl && apt-get clean
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
